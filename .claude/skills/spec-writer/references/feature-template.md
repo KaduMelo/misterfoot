@@ -122,7 +122,7 @@ graph TD
 
 | File Path | New/Modified | Purpose | Key Responsibilities |
 |-----------|--------------|---------|---------------------|
-| `app/services/feature.py` | New | Business logic | 2-3 responsibilities |
+| `src/server/services/feature.ts` | New | Business logic | 2-3 responsibilities |
 
 **Database:**
 
@@ -143,25 +143,25 @@ graph TD
 
 **Example:**
 
-**Endpoint: Record Token Usage**
+**Endpoint: Save Lineup**
 - **Method:** POST
-- **Path:** `/api/v1/analytics/token-usage`
+- **Path:** `/api/v1/lineups`
 - **Authentication:** JWT Bearer
 
 **Request:**
 
 | Field | Type | Required | Validation | Description |
 |-------|------|----------|------------|-------------|
-| `video_id` | `uuid` | Yes | valid UUID | Reference to video |
-| `service` | `string` | Yes | enum: openai, anthropic | AI provider |
-| `tokens_input` | `integer` | Yes | min: 0 | Input tokens |
+| `squad_id` | `uuid` | Yes | valid UUID | Reference to the squad |
+| `formation` | `string` | Yes | enum: 4-4-2, 4-3-3, 3-5-2 | Tactical formation |
+| `player_ids` | `uuid[]` | Yes | exactly 11 items | Starting XI |
 
 **Request Example:**
 ```json
 {
-  "video_id": "550e8400-e29b-41d4-a716-446655440000",
-  "service": "openai",
-  "tokens_input": 1500
+  "squad_id": "550e8400-e29b-41d4-a716-446655440000",
+  "formation": "4-3-3",
+  "player_ids": ["a1b2c3d4-...", "b2c3d4e5-...", "c3d4e5f6-..."]
 }
 ```
 
@@ -170,10 +170,10 @@ graph TD
 | Field | Type | Description |
 |-------|------|-------------|
 | `status` | `string` | Always "success" |
-| `data.id` | `uuid` | Created record ID |
-| `data.video_id` | `uuid` | Video reference |
-| `data.tokens_total` | `integer` | Computed total tokens |
-| `data.cost_usd` | `decimal` | Calculated cost |
+| `data.id` | `uuid` | Created lineup ID |
+| `data.squad_id` | `uuid` | Squad reference |
+| `data.formation` | `string` | Chosen formation |
+| `data.player_count` | `integer` | Number of players in the XI |
 
 **Response Example:**
 ```json
@@ -181,11 +181,9 @@ graph TD
   "status": "success",
   "data": {
     "id": "660e8400-e29b-41d4-a716-446655440001",
-    "video_id": "550e8400-e29b-41d4-a716-446655440000",
-    "service": "openai",
-    "tokens_input": 1500,
-    "tokens_total": 1500,
-    "cost_usd": 0.0045
+    "squad_id": "550e8400-e29b-41d4-a716-446655440000",
+    "formation": "4-3-3",
+    "player_count": 11
   }
 }
 ```
@@ -194,8 +192,9 @@ graph TD
 
 | Code | HTTP Status | Description |
 |------|-------------|-------------|
-| `TOKEN001` | 400 | Invalid service provider |
-| `TOKEN002` | 404 | Video not found |
+| `LINEUP001` | 400 | Invalid formation |
+| `LINEUP002` | 404 | Squad not found |
+| `LINEUP003` | 422 | Starting XI must have exactly 11 players |
 
 ### Section 6: Data Model
 
@@ -244,15 +243,15 @@ CREATE INDEX ix_table_field ON table_name(field);
 
 | Test File | Test Type | Target | Coverage Goal |
 |-----------|-----------|--------|---------------|
-| `tests/unit/test_service.py` | Unit | `service` | 90% |
-| `tests/integration/test_api.py` | Integration | API endpoints | 80% |
+| `tests/unit/lineup-service.test.ts` | Unit | `lineupService` | 90% |
+| `tests/integration/lineup-api.test.ts` | Integration | API endpoints | 80% |
 
 **For each test file, list functions:**
 
 | Test Function | Description | Assertions |
 |---------------|-------------|------------|
-| `test_create_success` | Valid creation | Returns object, DB record exists |
-| `test_create_invalid` | Validation failure | Raises ValidationError |
+| `saves lineup with valid payload` | Valid creation | Returns object, DB row exists |
+| `rejects lineup with invalid formation` | Validation failure | Returns 400 with error code |
 
 ---
 
@@ -344,17 +343,17 @@ CREATE INDEX ix_table_field ON table_name(field);
 ### Correct Plan Step (High-Level)
 
 ```markdown
-**1. Token Usage Model and Migration** - Create the database model and migration for tracking API token usage per video. Set up relationships to users and videos with appropriate indexes for query performance.
+**1. Lineup Model and Migration** - Create the database table and migration for storing saved lineups. Set up relationships to squads and players with appropriate indexes for query performance.
 ```
 
 ### Wrong Plan Step (Too Detailed)
 
 ```markdown
-**1. Token Usage Model and Migration** - Create the SQLAlchemy model for the `token_usage` table with fields including `user_id` (uuid, FK to users, ON DELETE CASCADE), `video_id` (uuid, FK to videos), `service` (varchar(50), enum: openai/anthropic/google)...
+**1. Lineup Model and Migration** - Create the Supabase migration for the `lineups` table with columns including `squad_id` (uuid, FK to squads, ON DELETE CASCADE), `formation` (varchar(10), enum: 4-4-2/4-3-3/3-5-2), `player_ids` (uuid[])...
 ```
 
 ### Wrong Plan Step (Too Vague)
 
 ```markdown
-**1. Token Usage Model** - Create a model to track token usage with the necessary fields.
+**1. Lineup Model** - Create a model to store saved lineups with the necessary fields.
 ```

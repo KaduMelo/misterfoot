@@ -107,15 +107,15 @@ Group stories by feature using feature IDs:
 - As a user, I want to register with email and password so that I can access the platform
 - As a user, I want to reset my password via email so that I can recover my account
 
-### F02. Video Upload
-- As a user, I want to drag files into a drop zone so that upload starts immediately
-- As a user, I want to see upload progress with speed and percentage so that I know when it finishes
+### F02. Squad Builder
+- As a user, I want to convoke players into my national squad so that I can assemble my team
+- As a user, I want to filter available players by position so that I can fill every role
 ```
 
 - Generate as many stories as the feature requires — no fixed range
 - Stories must describe concrete interactions with the product, not abstract goals
 - Do NOT generate stories by persona — group by feature only
-- For infrastructure/backend features with no direct user interaction, write stories from the system perspective (e.g., "As the system, I want to automatically process uploaded videos so that transcriptions are available within the SLA")
+- For infrastructure/backend features with no direct user interaction, write stories from the system perspective (e.g., "As the system, I want to simulate the match minute by minute so that the result is available as soon as the match ends")
 
 #### Section 6: Functionalities
 Structure: F01, F02, F03, etc. Every feature must have at minimum **Capabilities** and **Experience** blocks. All other blocks are conditional — omit them when empty/not applicable.
@@ -123,7 +123,7 @@ Structure: F01, F02, F03, etc. Every feature must have at minimum **Capabilities
 **1. Consumes** (omit if feature has no functional data dependencies):
 - List what data/outputs this feature requires from other features
 - Reference the providing feature by ID
-- Semi-technical level: name the business data objects and their key fields (e.g., "video file path, duration, format"), but do not use programming types (e.g., not "string", "int", "VideoMetadata interface")
+- Semi-technical level: name the business data objects and their key fields (e.g., "squad roster with player IDs, positions, overall rating"), but do not use programming types (e.g., not "string", "int", "SquadRoster interface")
 - Do NOT list authentication/session — auth is assumed for all features. Also do NOT list auth in Provides blocks.
 - Only list **functional data** dependencies (data that flows between features)
 
@@ -240,7 +240,7 @@ Always include:
 
 ```mermaid
 graph TD
-  F01[Auth] --> F02[Upload]
+  F01[Auth] --> F02[Squad]
   ...
 ```
 
@@ -431,26 +431,26 @@ Run the checklist once. If any item fails, correct the PRD and re-run the checkl
 
 ### F01. Authentication System
 - As a user, I want to register with email and password so that I can access the platform
-- As a user, I want to log in so that I can access my content
+- As a user, I want to log in so that I can access my saved teams
 
-### F02. Video Upload
-- As a user, I want to drag files into a drop zone so that upload starts immediately
-- As a user, I want to see upload progress so that I know when it finishes
+### F02. Squad Builder
+- As a user, I want to convoke players into my national squad so that I can assemble my team
+- As a user, I want to filter available players by position so that I can fill every role
 
-### F03. Background Processing
-- As the system, I want to automatically process uploaded videos so that transcriptions are available within the SLA
-- As a user, I want to see processing progress so that I know when my video will be ready
+### F03. Lineup & Tactics
+- As a user, I want to drag players into a formation so that I can set my starting XI
+- As a user, I want to choose a tactical style so that my team plays the way I want
 
-### F04. Video Player
-- As a user, I want to click a transcription segment to jump to that moment in the video
-- As a user, I want the current segment highlighted as the video plays
+### F04. Match Simulation
+- As a user, I want to start the match so that the result is simulated from my lineup and tactics
+- As a user, I want to watch the clock advance so that I follow the match as it unfolds
 
-### F05. Transcription Search
-- As a user, I want to search within a transcription to find specific topics
-- As a user, I want to click a search result to jump to that moment in the video
+### F05. Match Timeline
+- As a user, I want to click a match event to jump to that minute so that I can review key moments
+- As a user, I want the current minute highlighted as the match plays so that I keep my place
 
-### F06. AI Summary
-- As a user, I want to see an AI-generated summary of my video so that I can understand its content without watching
+### F06. Tactical Board
+- As a user, I want to see my formation drawn on the pitch so that I can read my team's shape at a glance
 
 ## 6. Functionalities
 
@@ -462,10 +462,10 @@ Run the checklist once. If any item fails, correct the PRD and re-run the checkl
 
 **Error Handling:** [3-5 scenarios - ONLY for critical features]
 
-### F02. Video Upload
+### F02. Squad Builder
 
 **Provides:**
-- Uploaded video file path and metadata (used by F03)
+- Squad roster with player IDs, positions, and overall rating (used by F03)
 
 **Capabilities:** [limits, formats, rules]
 
@@ -473,20 +473,19 @@ Run the checklist once. If any item fails, correct the PRD and re-run the checkl
 
 **Error Handling:** [3-5 scenarios - ONLY for critical features]
 
-### F03. Background Processing
+### F03. Lineup & Tactics
 
 **Consumes:**
-- F02: uploaded video file path and metadata
+- F02: squad roster with player IDs, positions, and overall rating
 
 **Provides:**
-- Transcription segments with start/end timestamps, detected language, video file path (used by F04)
-- Structured summary text (used by F06)
+- Confirmed lineup with starting XI, formation, and tactical style (used by F04, F06)
 
 **Core Scope:**
-- Video validation, audio extraction, transcription via Whisper, summary generation
+- Starting XI selection, formation grid, basic tactical style
 
 **Full Scope additions:**
-- Advanced retry strategies, priority queue processing
+- Set-piece takers, per-player instructions, preset tactical templates
 
 **Capabilities:** [limits, formats, rules]
 
@@ -494,31 +493,33 @@ Run the checklist once. If any item fails, correct the PRD and re-run the checkl
 
 **Error Handling:** [3-5 scenarios - ONLY for critical features]
 
-### F04. Video Player
+### F04. Match Simulation
 
 **Consumes:**
-- F03: transcription segments with start/end timestamps, video file path, detected language
+- F03: confirmed lineup with starting XI, formation, and tactical style
 
 **Provides:**
-- Transcription panel with segments and playback position (used by F05)
+- Match timeline with events (goals, cards, substitutions) and clock position (used by F05)
 
 **Capabilities:** [limits, formats, rules]
 
 **Experience:** [detailed flow]
 
-### F05. Transcription Search
+**Error Handling:** [3-5 scenarios - ONLY for critical features]
+
+### F05. Match Timeline
 
 **Consumes:**
-- F04: transcription panel with segments, playback position for seek-on-click
+- F04: match timeline with events and clock position for seek-on-click
 
 **Capabilities:** [limits, formats, rules]
 
 **Experience:** [detailed flow]
 
-### F06. AI Summary
+### F06. Tactical Board
 
 **Consumes:**
-- F03: structured summary text
+- F03: confirmed lineup with formation and tactical style
 
 **Capabilities:** [limits, formats, rules]
 
@@ -533,11 +534,11 @@ Run the checklist once. If any item fails, correct the PRD and re-run the checkl
 | # | Feature | Priority | Dependencies |
 |---|---------|----------|--------------|
 | F01 | Authentication System | 1 | None |
-| F02 | Video Upload | 1 | F01 |
-| F03 | Background Processing | 1 | F02 |
-| F04 | Video Player | 1 | F03 |
-| F05 | Transcription Search | 2 | F04 |
-| F06 | AI Summary | 1 | F03 |
+| F02 | Squad Builder | 1 | F01 |
+| F03 | Lineup & Tactics | 1 | F02 |
+| F04 | Match Simulation | 1 | F03 |
+| F05 | Match Timeline | 2 | F04 |
+| F06 | Tactical Board | 1 | F03 |
 
 ### Foundation Features
 These features set up shared project infrastructure. In a greenfield project they must be implemented sequentially before or alongside any feature that depends on them:
@@ -561,11 +562,11 @@ Features within the same wave can be built in parallel. A wave starts only after
 
 ```mermaid
 graph TD
-  F01[Auth] --> F02[Upload]
-  F02 --> F03[Processing]
-  F03 --> F04[Player]
-  F03 --> F06[Summary]
-  F04 --> F05[Search]
+  F01[Auth] --> F02[Squad]
+  F02 --> F03[Lineup]
+  F03 --> F04[Match]
+  F03 --> F06[Board]
+  F04 --> F05[Timeline]
 ```
 
 ## 9. Acceptance Criteria
@@ -574,31 +575,31 @@ graph TD
 - [ ] User can register with valid email and password
 - [ ] Login fails with generic error on wrong credentials
 
-### F02. Video Upload
-- [ ] User can upload files up to 2GB
-- [ ] Progress shows filename, percentage, and speed
+### F02. Squad Builder
+- [ ] User can convoke up to 23 players into the squad
+- [ ] Squad cannot be confirmed without at least one goalkeeper
 
-### F03. Background Processing
-- [ ] After upload completes, video automatically enters processing pipeline
-- [ ] Processing progress shows distinct stages
+### F03. Lineup & Tactics
+- [ ] User can place 11 players into a chosen formation
+- [ ] Lineup cannot be confirmed with an empty position
 
-### F04. Video Player
-- [ ] Clicking a transcription segment seeks video to that moment
-- [ ] Current segment is highlighted during playback
+### F04. Match Simulation
+- [ ] Starting the match produces a result derived from the lineup and tactics
+- [ ] Match clock advances from 0' to full time with events recorded
 
-### F05. Transcription Search
-- [ ] Search highlights all matching segments
-- [ ] Clicking a match seeks video to that timestamp
+### F05. Match Timeline
+- [ ] Timeline lists every match event in chronological order
+- [ ] Clicking an event seeks the match playback to that minute
 
-### F06. AI Summary
-- [ ] Summary displays below video player after processing completes
-- [ ] Summary contains paragraph overview and key topics
+### F06. Tactical Board
+- [ ] Board renders all 11 players in their formation positions
+- [ ] Changing the formation in F03 updates the board layout
 
 ### Cross-Feature Integration
-- [ ] Uploaded video file (F02) is correctly received and processed by pipeline (F03)
-- [ ] Transcription segments from processing (F03) display correctly in player (F04) with timestamps
-- [ ] Player transcription panel and playback position (F04) enable search-and-seek in search (F05)
-- [ ] Structured summary from processing (F03) renders correctly in summary section (F06)
+- [ ] Squad roster (F02) is correctly received and used to populate the lineup picker (F03)
+- [ ] Confirmed lineup and tactics (F03) drive the match simulation result (F04)
+- [ ] Match timeline and events (F04) enable seek-on-click in the timeline view (F05)
+- [ ] Confirmed lineup formation (F03) renders correctly on the tactical board (F06)
 ````
 
 ---

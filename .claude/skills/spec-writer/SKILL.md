@@ -15,7 +15,7 @@ Generate implementation-ready technical specifications based on the project's PR
 2. `plan.md` - Implementation plan (phases and steps)
 
 **Output location:** `docs/<feature-id>-<kebab-name>/spec.md` and `docs/<feature-id>-<kebab-name>/plan.md`
-- The `<kebab-name>` is derived from the feature's name in the PRD Section 6 (lowercase, spaces → hyphens, special characters removed). Example: `F03. Video Upload` → `docs/F03-video-upload/`.
+- The `<kebab-name>` is derived from the feature's name in the PRD Section 6 (lowercase, spaces → hyphens, special characters removed). Example: `F04. Match Simulation` → `docs/F04-match-simulation/`.
 
 ---
 
@@ -27,11 +27,11 @@ Note: These are internal agent execution steps. The OUTPUT plan document will ha
 
 **1.1: Identify the PRD and the target feature**
 
-Accept free-form input from the user. The user may reference the feature by ID (`F03`), by name (`Video Upload`), by path (`docs/PRD.md F03`), or any combination. Resolve the reference:
+Accept free-form input from the user. The user may reference the feature by ID (`F03`), by name (`Match Simulation`), by path (`docs/PRD.md F03`), or any combination. Resolve the reference:
 
 - Locate the PRD file from the user's reference or look for `docs/PRD.md`, `PRD.md`, or similar conventional locations. If multiple plausible PRDs exist, ask the user which one.
 - Identify the target feature within the PRD by ID or name.
-- If the input is ambiguous (e.g., "upload" matches multiple features), confirm with the user before proceeding.
+- If the input is ambiguous (e.g., "match" matches multiple features), confirm with the user before proceeding.
 - If the referenced feature does not exist in the PRD, list available features from Section 8 and ask the user to clarify.
 
 **PRD is mandatory.** If no PRD is found in the project, stop and instruct the user to generate one first with the `prd-writer` skill. Do not fall back to an unstructured interview.
@@ -125,7 +125,7 @@ If a question can be answered by exploring the codebase or reading the PRD, expl
 
 Focus the interview on decisions the PRD and codebase **do not** already answer: internal architecture, database schema details (columns, indexes, constraints), endpoint signatures, validation rules not specified in Capabilities, naming of new files, choice between libraries when patterns aren't established, edge cases not covered by Error Handling.
 
-**Partial PRD specifications:** When the PRD mentions a capability but omits a specific detail (e.g., "chunked upload" without chunk size), ask for the missing detail rather than assuming a default.
+**Partial PRD specifications:** When the PRD mentions a capability but omits a specific detail (e.g., "live match simulation" without a tick interval), ask for the missing detail rather than assuming a default.
 
 **Empty codebase bootstrap:** If Step 1.4 flagged empty codebase, ask transversal stack questions inline during this step (framework, ORM, auth, API style, validation, testing, error handling, folder structure). Once the first feature is implemented, the codebase becomes the reference for subsequent features.
 
@@ -225,7 +225,7 @@ The skill enters Batch Mode automatically when the input matches any of these sh
 - Mix within the same wave: `wave 3 F04`
 - Multiple feature names, or names mixed with IDs, as long as all resolve to the same wave
 
-Single-feature input (e.g., `F03`, `Video Upload`) continues to use the interactive flow (Steps 1–6).
+Single-feature input (e.g., `F03`, `Match Simulation`) continues to use the interactive flow (Steps 1–6).
 
 ### Same-wave rule
 
@@ -245,7 +245,7 @@ Step 1 (Resolve Input and Pre-Analysis) is adapted for the batch context as desc
 - **Locate the PRD** using Step 1.1 rules (user-provided path, `docs/PRD.md`, `PRD.md`, or similar). If no PRD is found, stop and direct the user to `prd-writer`. If multiple plausible PRDs exist, ask the user which one BEFORE continuing — this is the first possible interactive pause in the orchestrator.
 - Parse input into a list of target features (expand waves, merge lists, deduplicate).
 - If the PRD has no `Execution Waves` subsection in Section 8 and the input references a wave (e.g., `wave 3`), reject with: "Wave references require a 'Execution Waves' subsection in Section 8 of the PRD, which this PRD does not have. Use feature IDs directly or update the PRD." Do not attempt to synthesize waves.
-- If any feature name in the input is ambiguous (matches multiple features in the PRD, e.g., "upload" matches F03 and F11), list the candidates to the user and ask for disambiguation BEFORE proceeding to the rest of B.1. This is the second possible interactive pause before the consolidated plan.
+- If any feature name in the input is ambiguous (matches multiple features in the PRD, e.g., "match" matches F04 and F05), list the candidates to the user and ask for disambiguation BEFORE proceeding to the rest of B.1. This is the second possible interactive pause before the consolidated plan.
 - If any feature ID or name does not exist in the PRD, reject with the list of available features.
 - Validate the same-wave rule.
 - For each target, check whether `docs/<feature-id>-<kebab-name>/spec.md` already exists. Mark such features as "already has spec".
@@ -266,14 +266,14 @@ Show the plan and await explicit confirmation. Default template:
 
 ```
 Batch plan for <input>:
-- F04 Video Library (Core only) — new
-- F07 Background Processing Pipeline (full scope) — already has spec (skip / regenerate?)
-- F12 Administration Panel (full scope — no Core/Full split) — new
+- F04 Match Simulation (Core only) — new
+- F07 Live Commentary (full scope) — already has spec (skip / regenerate?)
+- F12 Admin Dashboard (full scope — no Core/Full split) — new
 
 Mode: parallel (N sub-agents)   # or "sequential (Foundation detected)" when applicable
 Codebase state: Foundation complete   # or greenfield / Partial Foundation
 Auto-accept: all spec-writer recommendations will be applied
-Destination: docs/F04-video-library/, docs/F07-background-processing-pipeline/, docs/F12-administration-panel/
+Destination: docs/F04-match-simulation/, docs/F07-live-commentary/, docs/F12-admin-dashboard/
 
 OK to proceed? (yes/no)
 ```
@@ -305,9 +305,9 @@ Wait for all sub-agents. Report consolidated result:
 
 ```
 Batch complete: 3/4 features generated successfully
-✓ F04 → docs/F04-video-library/
-✓ F07 → docs/F07-background-processing-pipeline/
-✓ F12 → docs/F12-administration-panel/
+✓ F04 → docs/F04-match-simulation/
+✓ F07 → docs/F07-live-commentary/
+✓ F12 → docs/F12-admin-dashboard/
 ✗ F05 → failed: <reason>
 ```
 
@@ -327,7 +327,7 @@ Each sub-agent skips the interactive interview (Step 2) and applies these defaul
 | Multiple conflicting patterns in the codebase | Pick the most frequent (or most recent when tied); document the choice |
 | Ambiguous feature reference | Cannot occur — orchestrator asks the user to disambiguate in B.1 before dispatch |
 | Empty codebase bootstrap (Step 1.4) | Fall back to industry best practices for the detected stack; document assumptions explicitly |
-| Partial PRD specifications (Step 2 — capability mentioned but a technical detail omitted, e.g., "chunked upload" without chunk size) | Apply an industry-standard default for the missing detail; document it as an explicit assumption in the spec. Do NOT block. |
+| Partial PRD specifications (Step 2 — capability mentioned but a technical detail omitted, e.g., "live match simulation" without a tick interval) | Apply an industry-standard default for the missing detail; document it as an explicit assumption in the spec. Do NOT block. |
 | Description too vague (feature definition leaves many decisions open) | Apply best-practice defaults for each open decision and document them as explicit assumptions in the spec; never silently infer |
 | No codebase patterns found (codebase non-empty but Pattern Discovery returned nothing) | Fall back to industry best practices for the detected stack; document as an explicit assumption |
 
@@ -384,7 +384,7 @@ All other spec-writer rules (PRD-driven content, codebase pattern adherence, SPE
 
 **Feature not found in PRD:** List the available features from PRD Section 8 and ask the user which one was intended.
 
-**Ambiguous feature reference:** If the user's input matches multiple features (e.g., "upload" matches F03 and F11), list the candidates and ask the user to disambiguate.
+**Ambiguous feature reference:** If the user's input matches multiple features (e.g., "match" matches F04 and F05), list the candidates and ask the user to disambiguate.
 
 **Multiple PRD files in the project:** Ask the user which PRD to use.
 
@@ -404,7 +404,7 @@ All other spec-writer rules (PRD-driven content, codebase pattern adherence, SPE
 
 **Multiple conflicting patterns in the codebase:** Present both, ask which to follow, document the choice.
 
-**Sanitizing feature name to kebab-case:** lowercase the name, replace spaces with hyphens, strip characters outside `[a-z0-9-]`. Example: `F07. Background Video Processing Pipeline` → `F07-background-video-processing-pipeline`.
+**Sanitizing feature name to kebab-case:** lowercase the name, replace spaces with hyphens, strip characters outside `[a-z0-9-]`. Example: `F04. Match Simulation Engine` → `F04-match-simulation-engine`.
 
 **Cross-wave batch input:** Reject with a message pointing to Section 8 of the PRD and explaining that waves run sequentially so the codebase accumulates patterns between waves. Do not auto-split into two batches — the user should run the earlier wave first, implement it, then run the next.
 

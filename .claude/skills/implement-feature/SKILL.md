@@ -11,9 +11,9 @@ Autonomously implement a feature from its existing `spec.md` + `plan.md`. The sk
 
 Free-form. The skill figures out what was passed. Any combination works:
 
-- A feature identifier: `F09`, `Video Upload`, or similar.
-- A feature folder: `docs/F09-in-video-transcription-search/`, `./F09/`, etc.
-- A file inside the feature folder: `docs/F09-in-video-transcription-search/spec.md`.
+- A feature identifier: `F05`, `Match Timeline`, or similar.
+- A feature folder: `docs/F05-match-timeline/`, `./F05/`, etc.
+- A file inside the feature folder: `docs/F05-match-timeline/spec.md`.
 - A PRD path: `@docs/PRD.md`, `docs/PRD.md`, `@PRD.md`.
 - Extra natural-language instructions appended anywhere (see **Overrides**).
 
@@ -116,7 +116,7 @@ Adapt when reality diverges from the spec (column named `pinned` in DB vs `isPin
 - Dependency feature missing (usually caught in Step 4; if discovered mid-phase, abort here).
 - Hard fail past the retry limit in Step 5.3 below.
 
-Missing external dependencies needed only by *tests* (e.g., `OPENAI_API_KEY` unavailable) do NOT abort the run — they soft-fail the affected test. The implementation code that calls the service is still written.
+Missing external dependencies needed only by *tests* (e.g., `SUPABASE_SERVICE_ROLE_KEY` unavailable) do NOT abort the run — they soft-fail the affected test. The implementation code that calls the service is still written.
 
 **5.3 — Validate**
 
@@ -277,7 +277,7 @@ Free-form instructions at the end of the invocation override defaults. Examples:
 - **Commit strategy**: `no commits, just implement`; `single commit at the end`.
 - **Validation**: `skip tests`, `skip lint`, `skip typecheck`.
 - **Phase selection**: `only phases 1 and 2`, `skip phase 3` — phase positions are ordinal; labels `A/B/C` map to `1/2/3`.
-- **External services**: `stub OpenAI`, `assume empty response for missing APIs` — stubs apply ONLY in test code; production modules keep the real call.
+- **External services**: `stub Supabase`, `assume empty response for missing APIs` — stubs apply ONLY in test code; production modules keep the real call.
 
 Unrecognized or contradictory overrides: default wins; logged under `Overrides ignored`.
 
